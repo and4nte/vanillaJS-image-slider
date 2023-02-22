@@ -49,12 +49,16 @@ session {
   position: relative;
 }
 
-.slide-item a {
+.slide-item {
   display: block;
   /*   width: 100%;
   height: 100%; */
 }
 
-.slide-item > img {
+.active.is-link {
+  cursor: pointer;
+}
+
+.active a {
   pointer-events: none;
 }

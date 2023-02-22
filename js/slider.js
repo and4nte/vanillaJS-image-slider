@@ -1,7 +1,7 @@
-// ! 700 값은 하드코딩. width값 가져와야함.
 const options = {
   containerWidth: 700,
   itemWidth: 700,
+  transform: '0.25s ease',
 };
 const $sliderContainer = document.querySelector('.slider-container');
 const $sliderWrapper = document.querySelector('.slider-wrapper');
@@ -15,6 +15,9 @@ const setSlide = (index = 1, transformOption = '0s linear') => {
   currentIndex = +index;
   $sliderWrapper.style.transition = `transform ${transformOption}`;
   $sliderWrapper.style.transform = `translateX(${-options.itemWidth * currentIndex}px)`;
+
+  $sliderWrapper.querySelectorAll('.active').forEach((el) => el.classList.remove('active'));
+  $sliderWrapper.querySelector(`[data-item-index="${currentIndex}"]`).classList.add('active');
 };
 
 const init = (() => {
@@ -25,12 +28,12 @@ const init = (() => {
   $sliderWrapper.appendChild($clonedFirstChild);
 
   const $slideItems = document.querySelectorAll('.slide-item');
-  $slideItems.forEach((el, i) => el.setAttribute('data-item-index', i));
+  $slideItems.forEach((el, i) => {
+    el.setAttribute('data-item-index', i);
+    if (el.querySelector('a')) el.classList.add('is-link');
+  });
 
-  // show start slide
   setSlide();
-
-  // todo: add class 'is-selected', 'next', 'prev'
 })();
 
 // * when mousedown
@@ -41,8 +44,7 @@ $sliderContainer.addEventListener('mousedown', (e) => {
   // if clicked outside '.slider-wrapper', reset current slide.
   const $slideItem = e.target.closest('.slide-item');
   if (!$slideItem) {
-    // show start slide
-    setSlide(1, '0.25s ease');
+    setSlide(1, options.transform);
     isStart = false;
     return;
   }
@@ -64,8 +66,14 @@ window.addEventListener('mouseup', (e) => {
 
   if (dist > 50) currentIndex--;
   else if (dist < -50) currentIndex++;
-
-  setSlide(currentIndex, '0.25s ease');
+  else if (Math.abs(dist) < 3) {
+    // if slide has anchor tag, redirect
+    const curr = $sliderWrapper.querySelector(`[data-item-index="${currentIndex}"]`);
+    if (curr.classList.contains('is-link')) {
+      window.location.href = curr.querySelector('a').getAttribute('href');
+    }
+  }
+  setSlide(currentIndex, options.transform);
 });
 
 // * when mouseMove

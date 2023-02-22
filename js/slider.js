@@ -49,11 +49,10 @@ $sliderContainer.addEventListener('mousedown', (e) => {
 
   // set currentIndex for infinite scroll
   currentIndex = +$slideItem.getAttribute('data-item-index');
-  if (currentIndex === lastIndex) currentIndex = 1;
-  else if (currentIndex === 0) currentIndex = lastIndex - 1;
+  if (currentIndex === lastIndex) setSlide(1);
+  else if (currentIndex === 0) setSlide(lastIndex - 1);
 
   startX = e.pageX - $sliderContainer.offsetLeft;
-  // console.log('>>> current:', $slideItem);
 });
 
 // * when mouseup

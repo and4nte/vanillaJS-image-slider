@@ -5,15 +5,14 @@ const options = {
 };
 const $sliderContainer = document.querySelector('.slider-container');
 const $sliderWrapper = document.querySelector('.slider-wrapper');
+const lastIndex = $sliderWrapper.children.length + 1;
 
 let isStart = false;
 let startX;
 let currentIndex = 1;
 
-// // todo: setSlide 로 변경하고 currentIndex를 인자로 받아서 해당 index로 슬라이드 이동
-// // todo: setSlide를 이용해 mouseup 부분 리팩토링
 const setSlide = (index = 1, transformOption = '0s linear') => {
-  currentIndex = index;
+  currentIndex = +index;
   $sliderWrapper.style.transition = `transform ${transformOption}`;
   $sliderWrapper.style.transform = `translateX(${-options.itemWidth * currentIndex}px)`;
 };
@@ -34,12 +33,8 @@ const init = (() => {
   // todo: add class 'is-selected', 'next', 'prev'
 })();
 
-console.log($sliderContainer.getBoundingClientRect());
-console.log($sliderWrapper.getBoundingClientRect());
-
 // * when mousedown
 $sliderContainer.addEventListener('mousedown', (e) => {
-  // if (!e.target.classList.contains('is-selected')) return;
   e.preventDefault();
   isStart = true;
 
@@ -52,10 +47,13 @@ $sliderContainer.addEventListener('mousedown', (e) => {
     return;
   }
 
+  // set currentIndex for infinite scroll
   currentIndex = +$slideItem.getAttribute('data-item-index');
-  startX = e.pageX - $sliderContainer.offsetLeft;
+  if (currentIndex === lastIndex) currentIndex = 1;
+  else if (currentIndex === 0) currentIndex = lastIndex - 1;
 
-  console.log('>>> current:', e.target, currentIndex);
+  startX = e.pageX - $sliderContainer.offsetLeft;
+  // console.log('>>> current:', $slideItem);
 });
 
 // * when mouseup
@@ -64,15 +62,11 @@ window.addEventListener('mouseup', (e) => {
 
   isStart = false;
   const dist = e.pageX - startX - $sliderContainer.offsetLeft || 0;
-  console.log(`dist: ${dist}px`);
 
-  // todo: infinite 구현
-  if (dist > 50) currentIndex--; // <<<
-  else if (dist < -50) currentIndex++; // >>>
-  else console.log('dont move'); // ==
+  if (dist > 50) currentIndex--;
+  else if (dist < -50) currentIndex++;
 
   setSlide(currentIndex, '0.25s ease');
-  console.log(`translateX(${-options.itemWidth * currentIndex}px)`);
 });
 
 // * when mouseMove

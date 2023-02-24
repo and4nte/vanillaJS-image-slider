@@ -16,6 +16,7 @@ a {
 body {
   width: 100vw;
   height: 100vh;
+  touch-action: pan-y;
 }
 
 main {
@@ -38,6 +39,7 @@ session {
   max-height: 100%;
   /* height: 300px; */
   overflow: hidden;
+  touch-action: pan-x;
 }
 
 .slider-wrapper {

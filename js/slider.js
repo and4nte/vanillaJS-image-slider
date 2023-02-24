@@ -36,8 +36,7 @@ const init = (() => {
   setSlide();
 })();
 
-// * when mousedown
-$sliderContainer.addEventListener('mousedown', (e) => {
+const startSlider = (e) => {
   e.preventDefault();
   isStart = true;
 
@@ -54,15 +53,30 @@ $sliderContainer.addEventListener('mousedown', (e) => {
   if (currentIndex === lastIndex) setSlide(1);
   else if (currentIndex === 0) setSlide(lastIndex - 1);
 
-  startX = e.pageX - $sliderContainer.offsetLeft;
-});
+  // check desktop or mobile
+  startX = e.clientX ? e.clientX : e.touches[0].screenX;
+  $sliderContainer.addEventListener(e.clientX ? 'mousemove' : 'touchmove', moveSlider, {
+    passive: false,
+  });
+};
 
-// * when mouseup
-window.addEventListener('mouseup', (e) => {
+const moveSlider = (e) => {
+  if (!isStart) return;
+  e.preventDefault();
+
+  let currentX = e.clientX || e.touches[0].screenX;
+
+  $sliderWrapper.style.transition = 'transform 0s linear';
+  $sliderWrapper.style.transform = `translateX(${
+    currentX - startX - options.itemWidth * currentIndex
+  }px)`;
+};
+
+const endSlider = (e) => {
   if (!isStart) return;
 
   isStart = false;
-  const dist = e.pageX - startX - $sliderContainer.offsetLeft || 0;
+  const dist = (e.clientX || e.changedTouches[0].screenX) - startX || 0;
 
   if (dist > 50) currentIndex--;
   else if (dist < -50) currentIndex++;
@@ -74,15 +88,12 @@ window.addEventListener('mouseup', (e) => {
     }
   }
   setSlide(currentIndex, options.transform);
-});
+};
 
-// * when mouseMove
-$sliderContainer.addEventListener('mousemove', (e) => {
-  if (!isStart) return;
-  e.preventDefault();
+// * when mousedown or touchstart
+$sliderContainer.addEventListener('mousedown', startSlider);
+$sliderContainer.addEventListener('touchstart', startSlider, { passive: false });
 
-  $sliderWrapper.style.transition = 'transform 0s linear';
-  $sliderWrapper.style.transform = `translateX(${
-    e.pageX - $sliderContainer.offsetLeft - startX - options.itemWidth * currentIndex
-  }px)`;
-});
+// * when mouseup or touchend
+window.addEventListener('mouseup', endSlider);
+window.addEventListener('touchend', endSlider);
